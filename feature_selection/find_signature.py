@@ -1,6 +1,8 @@
 #!/usr/bin/python
 
 import pickle
+from time import time
+
 import numpy
 numpy.random.seed(42)
 
@@ -28,6 +30,7 @@ vectorizer = TfidfVectorizer(sublinear_tf=True, max_df=0.5,
 features_train = vectorizer.fit_transform(features_train)
 features_test  = vectorizer.transform(features_test).toarray()
 
+print vectorizer.get_feature_names()[33614]
 
 ### a classic way to overfit is to use a small number
 ### of data points and a large number of features;
@@ -38,6 +41,29 @@ labels_train   = labels_train[:150]
 
 
 ### your code goes here
+from sklearn import tree
+from sklearn.metrics import accuracy_score
 
+clf = tree.DecisionTreeClassifier(min_samples_split=40)
 
+t0 = time()
+clf = clf.fit(features_train, labels_train)
+print "training time:", round(time()-t0,3), "s"
 
+t1 = time()
+pred = clf.predict(features_test)
+print "predicting time:", round(time()-t1,3), "s"
+
+acc = accuracy_score(pred, labels_test)
+print acc
+
+imp_words=[]
+for i, imp in enumerate(clf.feature_importances_):
+    if imp > 0.2:
+        print i
+        print imp
+        word= vectorizer.get_feature_names()[i]
+        print word
+        imp_words.append(word)
+
+print(len(imp_words))
